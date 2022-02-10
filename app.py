@@ -48,7 +48,7 @@ async def process_audio(connection, data):
 
 
 static_files = {
-    '/static': './public',
+    '/': './public/index.html',
 }
 
 
