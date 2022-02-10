@@ -15,6 +15,7 @@ sio = socketio.AsyncServer(async_mode='asgi')
 async def print_message(sid, message):
     print("Socket ID: ", sid)
     print(message)
+    await sio.emit('message', f"received: {message}")
 
 
 @sio.on('audio')

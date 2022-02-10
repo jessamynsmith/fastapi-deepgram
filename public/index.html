@@ -19,13 +19,19 @@
     <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
     <script>
       const socket = io();
+      
+      socket.on("message", function(data) {
+        console.log(data);
+      });
 
       const downloadLink = document.getElementById('download');
       const startButton = document.getElementById('start');
       const stopButton = document.getElementById('stop');
     
       const handleSuccess = function(stream) {
-          console.log('setting up recorder')
+        console.log('setting up recorder')
+        socket.emit("message", "got audio");
+        
         const options = {
               mimeType: 'audio/webm'
           };
