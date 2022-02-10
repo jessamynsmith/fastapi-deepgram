@@ -72,4 +72,5 @@ async def print_message(sid, data):
 # wrap with ASGI application
 app = socketio.ASGIApp(sio, static_files=static_files)
 
-uvicorn.run(app, host='127.0.0.1', port=8000)
+if __name__ == "__main__":
+    uvicorn.run(app, host='127.0.0.1', port=8000)
