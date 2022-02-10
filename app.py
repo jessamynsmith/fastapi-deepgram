@@ -6,8 +6,6 @@ from deepgram import Deepgram
 
 DEEPGRAM_API_KEY = os.environ.get('DEEPGRAM_API_KEY')
 
-dg_socket = None
-
 
 async def transcript_handler(data):
     print('transcript handler')
@@ -19,12 +17,6 @@ async def transcript_handler(data):
 
 
 async def connect_to_deepgram():
-    global dg_socket
-
-    if dg_socket:
-        print('Socket to deepgram is already open')
-        return
-
     # Initialize the Deepgram SDK
     dg_client = Deepgram(DEEPGRAM_API_KEY)
 
@@ -40,9 +32,11 @@ async def connect_to_deepgram():
     except Exception as e:
         print(f'Could not open socket: {e}')
 
+    return dg_socket
+
 
 async def process_audio(connection, data):
-    print('processing audio')
+    print('processing audio', len(data))
     await sio.emit('message', f"received audio")
 
     connection.send(data)
@@ -71,7 +65,7 @@ async def print_message(sid, message):
 @sio.on('audio')
 async def print_message(sid, data):
     print("Socket ID: ", sid)
-    await connect_to_deepgram()
+    dg_socket = await connect_to_deepgram()
     await process_audio(dg_socket, data)
 
 
