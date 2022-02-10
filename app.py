@@ -13,11 +13,13 @@ sio = socketio.AsyncServer(async_mode='asgi')
 
 @sio.on('message')
 async def print_message(sid, message):
-    ## When we receive a new event of type
-    ## 'message' through a socket.io connection
-    ## we print the socket ID and the message
     print("Socket ID: ", sid)
     print(message)
+
+
+@sio.on('audio')
+async def print_message(sid, message):
+    print("Socket ID: ", sid)
 
 
 # wrap with ASGI application

@@ -5,19 +5,64 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
+    <title>Example</title>
+    
   </head>
   <body>
-    <button onClick="sendMsg()">Hit Me</button>
+    
+    <div>
+        <a id="download">Download</a>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+    </div>
 
     <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
     <script>
       const socket = io();
 
-      function sendMsg() {
-        console.log('sending message')
-        socket.emit("message", "HELLO WORLD");
-      }
+      const downloadLink = document.getElementById('download');
+      const startButton = document.getElementById('start');
+      const stopButton = document.getElementById('stop');
+    
+      const handleSuccess = function(stream) {
+          console.log('setting up recorder')
+        const options = {
+              mimeType: 'audio/webm'
+          };
+        const recordedChunks = [];
+        const mediaRecorder = new MediaRecorder(stream, options);
+    
+        mediaRecorder.addEventListener('dataavailable', function(e) {
+            console.log('data available')
+            if (e.data.size > 0) {
+                console.log('size greater than 0')
+                recordedChunks.push(e.data);
+                socket.emit("audio", e.data);
+            } 
+        });
+    
+        mediaRecorder.addEventListener('stop', function() {
+          downloadLink.href = URL.createObjectURL(new Blob(recordedChunks));
+          downloadLink.download = 'acetest.webm';
+            
+          // postAudio(recordedChunks)
+        });
+        
+        startButton.addEventListener('click', function() {
+            console.log("starting recorder")
+            mediaRecorder.start();
+        });
+    
+        stopButton.addEventListener('click', function() {
+            console.log("stopping recorder")
+            mediaRecorder.stop();
+            // postAudio(recordedChunks)
+        });
+      };
+    
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          .then(handleSuccess);
+
     </script>
   </body>
 </html>
