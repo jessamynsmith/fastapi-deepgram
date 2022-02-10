@@ -15,18 +15,24 @@
         <button id="start">Start</button>
         <button id="stop">Stop</button>
     </div>
+    
+    <div id="messages"></div>
 
     <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
     <script>
-      const socket = io();
-      
-      socket.on("message", function(data) {
-        console.log(data);
-      });
-
       const downloadLink = document.getElementById('download');
       const startButton = document.getElementById('start');
       const stopButton = document.getElementById('stop');
+      const messagesDiv = document.getElementById('messages');
+      
+      const socket = io();
+      
+      socket.on("message", function(message) {
+        console.log(message);
+        let messageNode = document.createElement('div');
+        messageNode.appendChild(document.createTextNode(message))
+        messagesDiv.appendChild(messageNode)
+      });
     
       const handleSuccess = function(stream) {
         console.log('setting up recorder')
