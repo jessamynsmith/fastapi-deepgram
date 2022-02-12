@@ -26,7 +26,8 @@
       const messagesDiv = document.getElementById('messages');
       
       // const socket = io('/ws');
-      var socket = new WebSocket("ws://localhost:8000/ws");
+      let host = window.location.host;
+      var socket = new WebSocket(`ws://${window.location.host}/ws`);
       
       socket.onmessage = function(message) {
         console.log(message);
