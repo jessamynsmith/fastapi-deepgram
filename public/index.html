@@ -25,18 +25,19 @@
       const stopButton = document.getElementById('stop');
       const messagesDiv = document.getElementById('messages');
       
-      const socket = io();
+      // const socket = io('/ws');
+      var socket = new WebSocket("ws://localhost:8000/ws");
       
-      socket.on("message", function(message) {
+      socket.onmessage = function(message) {
         console.log(message);
         let messageNode = document.createElement('div');
-        messageNode.appendChild(document.createTextNode(message))
+        messageNode.appendChild(document.createTextNode(message.data))
         messagesDiv.appendChild(messageNode)
-      });
+      };
     
       const handleSuccess = function(stream) {
         console.log('setting up recorder')
-        socket.emit("message", "got audio");
+        // socket.send("got audio");
         
         const options = {
               mimeType: 'audio/webm'
@@ -49,7 +50,7 @@
             if (e.data.size > 0) {
                 console.log('size greater than 0')
                 recordedChunks.push(e.data);
-                socket.emit("audio", e.data);
+                socket.send(e.data);
             } 
         });
     

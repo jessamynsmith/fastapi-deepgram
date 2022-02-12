@@ -1,10 +1,21 @@
 import os
-import socketio
 import uvicorn
+
+from fastapi import FastAPI, WebSocket
+from fastapi.staticfiles import StaticFiles
+
 from deepgram import Deepgram
 
 
 DEEPGRAM_API_KEY = os.environ.get('DEEPGRAM_API_KEY')
+
+
+socket = None
+
+
+app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="public"), name="static")
 
 
 async def transcript_handler(data):
@@ -12,7 +23,7 @@ async def transcript_handler(data):
     if 'channel' in data:
         transcript = data['channel']['alternatives'][0]['transcript']
         print('received transcript:', transcript)
-        await sio.emit('message', f"received: {transcript}")
+        await socket.send_text(f"received: {transcript}")
         print("sent")
 
 
@@ -37,7 +48,7 @@ async def connect_to_deepgram():
 
 async def process_audio(connection, data):
     print('processing audio', len(data))
-    await sio.emit('message', f"received audio")
+    await socket.send_text(f"received audio")
 
     connection.send(data)
 
@@ -47,30 +58,17 @@ async def process_audio(connection, data):
     print('finished')
 
 
-static_files = {
-    '/': './public/index.html',
-}
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    global socket
+    await websocket.accept()
+    socket = websocket
+    while True:
+        data = await websocket.receive_bytes()
 
+        dg_socket = await connect_to_deepgram()
+        await process_audio(dg_socket, data)
 
-# create a Socket.IO server
-sio = socketio.AsyncServer(async_mode='asgi')
-
-
-@sio.on('message')
-async def print_message(sid, message):
-    print("Socket ID: ", sid)
-    await sio.emit('message', f"received: {message}")
-
-
-@sio.on('audio')
-async def print_message(sid, data):
-    print("Socket ID: ", sid)
-    dg_socket = await connect_to_deepgram()
-    await process_audio(dg_socket, data)
-
-
-# wrap with ASGI application
-app = socketio.ASGIApp(sio, static_files=static_files)
 
 if __name__ == "__main__":
     uvicorn.run(app, host='127.0.0.1', port=8000)
