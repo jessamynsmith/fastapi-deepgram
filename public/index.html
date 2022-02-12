@@ -28,7 +28,7 @@
       // const socket = io('/ws');
       let host = window.location.host;
       let protocol = 'ws'
-      if (window.location.protocol === 'https') {
+      if (window.location.protocol === 'https:') {
         protocol = 'wss'
       }
       var socket = new WebSocket(`${protocol}://${host}/ws`);
